@@ -11,7 +11,6 @@ The Java Domain Crawler is a multi-threaded web crawler designed to traverse and
 
 ## Requirements
 - Java 21 or higher
-- Maven
 
 ## Installation
 1. Clone the repository:
@@ -19,22 +18,18 @@ The Java Domain Crawler is a multi-threaded web crawler designed to traverse and
     git clone https://github.com/mate-csizmazia/crawler.git
     cd crawler
     ```
-
-2. Build the project using Maven:
-    ```sh
-    mvn clean install
-    ```
-
+   
 ## Usage
 1. Specify the domain to be crawled in the `Main.java` file:
     ```java
     final String DOMAIN_URL = "orf.at";
     ```
+    _Best working example is **orf.at** because
+   the urls are stored in their entire format in the response HTML,
+   so the regex can pick those up easily._
+ 
 
-2. Run the application:
-    ```sh
-    mvn exec:java -Dexec.mainClass="com.crawler.Main"
-    ```
+2. Run the application 
 
 3. The application will output the unique URLs found within the specified domain.
 

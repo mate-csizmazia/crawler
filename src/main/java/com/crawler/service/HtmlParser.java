@@ -15,19 +15,21 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class HtmlParser {
+    //set to false if you want to crawl only the specified domain
+    final static boolean INCLUDE_SUBDOMAINS = true;
+
+    private final Logger LOG = Logger.getLogger(HtmlParser.class.getName());
+    private final UrlWrapper urlWrapper;
+    private HttpURLConnection connection;
+    private BufferedReader reader;
+
     public HtmlParser(UrlWrapper urlWrapper) {
         this.urlWrapper = urlWrapper;
     }
 
-    private final Logger LOG = Logger.getLogger(HtmlParser.class.getName());
-    private final UrlWrapper urlWrapper;
-
     public Set<String> getLinks(String address) {
-        HttpURLConnection connection = null;
-        BufferedReader reader = null;
         Set<String> links = new HashSet<>();
-        Pattern pattern = Pattern.compile(getRegex(true));
-
+        Pattern pattern = Pattern.compile(getRegex());
 
         try {
             URL url = URI.create(address).toURL();
@@ -44,27 +46,37 @@ public class HtmlParser {
         } catch (IOException e) {
             LOG.info("Error while reading HTML: " + e.getMessage());
         } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (connection != null) {
-                connection.disconnect();
-            }
+            cleanup();
         }
-
         return links;
     }
 
-    private String getRegex(boolean includeSubdomains) {
-        if (includeSubdomains) {
-            return String.format("<a\\s+[^>]*href=[\"'](https://(?:[\\w-]+\\.)*%s\\.%s[^\"']*)[\"'][^>]*>", urlWrapper.secondaryLevelDomain(), urlWrapper.topLevelDomain());
-        } else {
-            return String.format("<a\\s+[^>]*href=[\"'](https://%s\\.%s[^\"']*)[\"'][^>]*>", urlWrapper.secondaryLevelDomain(), urlWrapper.topLevelDomain());
+    private void cleanup() {
+        if (reader != null) {
+            try {
+                reader.close();
+            } catch (IOException e) {
+               LOG.info("Error while closing reader: " + e.getMessage());
+            }
         }
+        if (connection != null) {
+            connection.disconnect();
+        }
+    }
 
+    private String getRegex() {
+        if (INCLUDE_SUBDOMAINS) {
+            return String.format(
+                "<a\\s+[^>]*href=[\"'](https://(?:[\\w-]+\\.)*%s\\.%s[^\"']*)[\"'][^>]*>",
+                urlWrapper.secondaryLevelDomain(),
+                urlWrapper.topLevelDomain()
+            );
+        } else {
+            return String.format(
+                "<a\\s+[^>]*href=[\"'](https://%s\\.%s[^\"']*)[\"'][^>]*>",
+                urlWrapper.secondaryLevelDomain(),
+                urlWrapper.topLevelDomain()
+            );
+        }
     }
 }
