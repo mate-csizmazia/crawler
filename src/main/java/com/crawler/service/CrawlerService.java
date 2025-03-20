@@ -37,7 +37,7 @@ public class CrawlerService {
 
     private void crawl(String url) {
         final HtmlParser htmlParser = new HtmlParser(urlWrapper);
-        System.out.println("Crawling in my skin: " + url + " by thread: " + Thread.currentThread().getName());
+        System.out.println("Crawling: " + url + " by thread: " + Thread.currentThread().getName());
 
         if (!shouldVisit(url)) {
             return;
